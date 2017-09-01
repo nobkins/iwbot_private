@@ -28,7 +28,7 @@ public class Applicant implements GuildCommand {
     @Override
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         //Permission check
-        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event))) {
+        if (!(DataProvider.isOwner(event) || DataProvider.isAdmin(event) || DataProvider.isAdvisor(event))) {
             event.getChannel().sendMessage("[Error] You aren't authorized to do this").queue();
             return;
         }

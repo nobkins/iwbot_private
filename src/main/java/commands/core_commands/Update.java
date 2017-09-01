@@ -23,7 +23,7 @@ public class Update implements GuildCommand, PMCommand {
             return;
         }
 
-        String branch = args.length == 0 ? "master" : args[0];
+        String branch = args.length == 0 ? DataProvider.getGithubBranch() : args[0];
         update(event.getChannel(), branch);
     }
 
@@ -35,7 +35,7 @@ public class Update implements GuildCommand, PMCommand {
             return;
         }
 
-        String branch = args.length == 0 ? "master" : args[0];
+        String branch = args.length == 0 ? DataProvider.getGithubBranch(): args[0];
         update(event.getChannel(), branch);
     }
 
@@ -57,20 +57,20 @@ public class Update implements GuildCommand, PMCommand {
 
             // Make sure we are not in a detached state
             if (WORKDIR.exists())
-                rt.exec("git checkout master", envp, WORKDIR).waitFor();
+                rt.exec("git checkout " + branch, envp, WORKDIR).waitFor();
 
             // Download source code from GitHub
             chan.sendMessage("Downloading new sources...").queue();
             if (WORKDIR.exists())
                 rt.exec("git fetch", envp, WORKDIR).waitFor();
             else
-                rt.exec("git clone https://" + token + "@github.com/Bermos/iwbot_private.git").waitFor();
+                rt.exec("git clone https://" + token + "@github.com/" + DataProvider.getGithubRepo() + ".git").waitFor();
 
             // Switch to specified branch
             p = rt.exec("git branch -a", envp, WORKDIR);
             List<String> branches = new BufferedReader(new InputStreamReader(p.getInputStream())).lines()
                     .filter(l -> !l.contains("detached"))
-                    .map(i -> i.replace("remotes/origin/", "").replace(" -> origin/master", "").trim())
+                    .map(i -> i.replace("remotes/origin/", "").replace(" -> origin/"+branch, "").trim())
                     .collect(Collectors.toList());
 
             p.waitFor();
@@ -82,11 +82,10 @@ public class Update implements GuildCommand, PMCommand {
 
             // Compile code and make sure it works
             chan.sendMessage("Download finished, compiling...").queue();
-            p = rt.exec("mvn package", new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
+            p = rt.exec(new String[] {DataProvider.getMVNCmd(),"package"}, new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
             new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l -> {
-                try { fw.append(l + "\n"); } catch (IOException ignored) {}
-
+                try { fw.append(l).append("\n"); } catch (IOException ignored) {}
                 if (l.contains("Building iwbot"))
                     chan.sendMessage(l.replace("[INFO] ", "")).queue();
 
@@ -104,7 +103,6 @@ public class Update implements GuildCommand, PMCommand {
                         chan.sendMessage(total + " tests successful").queue();
                     else {
                         chan.sendMessage("**" + l + "**\n**Abort update**").queue();
-                        return;
                     }
                 }
                 else if (l.contains("BUILD SUCCESS"))
@@ -112,12 +110,11 @@ public class Update implements GuildCommand, PMCommand {
 
                 else if (l.contains("COMPILATION ERROR")) {
                     chan.sendMessage("**Compilation failed. Update aborted**").queue();
-                    return;
                 }
             });
             fw.close();
             p.waitFor();
-            rt.exec("git checkout master", envp, WORKDIR).waitFor();
+            rt.exec("git checkout "+ branch, envp, WORKDIR).waitFor();
             System.exit(1);
         } catch (Exception e) {
             LogUtil.logErr(e);

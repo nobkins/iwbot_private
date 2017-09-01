@@ -71,7 +71,7 @@ public class Main {
 			pw = RandomStringUtils.random(20, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@*?()$");
 			// Create new random passwords until they contain both numbers and special characters
 		} while (!numPat.matcher(pw).find() || !sozPat.matcher(pw).find());
-		DataProvider.addConnection("mysql", ip, db, us, pw);
+		DataProvider.addConnection(ip, db, us, pw);
 
 		PreparedStatement ps = con.prepareStatement("CREATE USER 'iwbot'@'localhost' IDENTIFIED BY ?;");
 		ps.setString(1, pw);

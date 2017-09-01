@@ -32,7 +32,8 @@ public class DataProvider {
 		class Discord {
 			String token;
 			List<String> idOwner;
-			List<String> idRoles;
+			List<String> idAdminRoles;
+			List<String> idAdvisorRoles;
 			String newMember;
 			String adminChanID;
 			String prefix;
@@ -44,8 +45,12 @@ public class DataProvider {
 		String inaraUser;
 		String googleToken;
 		String githubToken;
+		String githubRepo;
+		String githubBranch;
 		String JAVA_HOME;
+		String MVNCmd;
 		boolean dev;
+		boolean sync;
 	}
 
 	public static Info getInfoBackup() {
@@ -179,7 +184,11 @@ public class DataProvider {
 	 * @return the ids of all admin roles
 	 */
 	public static List<String> getAdminRoleIDs() {
-		return info.discord.idRoles;
+		return info.discord.idAdminRoles;
+	}
+
+	private static List<String> getAvisorRoleIDs() {
+		return info.discord.idAdvisorRoles;
 	}
 	
 	/**
@@ -187,12 +196,12 @@ public class DataProvider {
 	 * @param id of the admin role
 	 */
 	public static void addAdminRoleID(String id) {
-		info.discord.idRoles.add(id);
+		info.discord.idAdminRoles.add(id);
 		setInfo();
 	}
 	
 	public static void removeAdminRoleID(String id) {
-		info.discord.idRoles.remove(id);
+		info.discord.idAdminRoles.remove(id);
 		setInfo();
 	}
 
@@ -215,6 +224,16 @@ public class DataProvider {
 				isAdmin = true;
 		}
 		return isAdmin;
+	}
+
+	public static boolean isAdvisor(GuildMessageReceivedEvent event) {
+		boolean isAdvisor = false;
+		for (Role role : event.getMember().getRoles()) {
+			System.out.printf(role.getId()+"\n");
+			if (getAvisorRoleIDs().contains(role.getId()))
+				isAdvisor = true;
+		}
+		return isAdvisor;
 	}
 
 	public static boolean isAdmin(List<Role> roles) {
@@ -247,6 +266,10 @@ public class DataProvider {
 		return info.googleToken;
 	}
 
+	public static String getMVNCmd() {
+		return info.MVNCmd;
+	}
+
 	/**
 	 *
 	 * @return if the bot runs in development
@@ -255,19 +278,29 @@ public class DataProvider {
 		return info.dev;
 	}
 
-	public static ConData getConData(String conName) {
+	public static boolean doSync () {
+		return info.sync;
+	}
+
+	static ConData getConData(String conName) {
 		return info.connections.get(conName);
 	}
 
 	public static String getGithubToken() {
 	    return info.githubToken;
     }
+	public static String getGithubRepo() {
+		return info.githubRepo;
+	}
+	public static String getGithubBranch() {
+		return info.githubBranch;
+	}
 
-    public static void addConnection(String name, String ip, String db, String us, String pw) {
+    public static void addConnection(String ip, String db, String us, String pw) {
 	    ConData con = new ConData();
 	    con.IP = ip; con.DB = db;
 	    con.US = us; con.PW = pw;
-	    info.connections.put(name, con);
+	    info.connections.put("mysql", con);
 
 	    setInfo();
     }
