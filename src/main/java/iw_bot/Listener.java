@@ -68,7 +68,9 @@ public class Listener extends ListenerAdapter {
 
         //Setup and synchronise users and online status with MySQL db
         new Users();
-        Users.sync(event);
+        if (DataProvider.doSync()) {
+			Users.sync(event);
+		}
 
         //Start checks for any set reminders from users
         new Reminder().startChecks(event.getJDA());
