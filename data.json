@@ -4,9 +4,11 @@
     "idOwner": [
       "1"
     ],
-    "idRoles": [
+    "idAdminRoles": [
       "1"
     ],
+	"idAdvisorRoles": [
+	1],
     "newMember": "",
     "adminChanID": "1",
     "prefix": "/"
@@ -23,6 +25,9 @@
   "inaraPW": "1",
   "googleToken": "1",
   "githubToken": "1",
+  "githubRepo": "1",
+  "githubBranch": "1",
   "JAVA_HOME": "",
+  "MVNCmd": "mvn",
   "dev": true
 }
