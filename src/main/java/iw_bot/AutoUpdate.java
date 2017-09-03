@@ -58,7 +58,7 @@ class AutoUpdate {
             Push push = gson.fromJson(jReader, Push.class);
 
 
-            if (push.ref.contains("master")) {
+            if (push.ref.contains(DataProvider.getGithubBranch())) {
                 String commits = "";
                 for (Commit commit : push.commits) {
                     commits += "Author: " + commit.author.username + "\n";
@@ -83,8 +83,8 @@ class AutoUpdate {
             os.write("".getBytes());
             os.close();
 
-            if (push.ref.contains("master")) {
-                Update.update(chan, "master");
+            if (push.ref.contains(DataProvider.getGithubBranch())) {
+                Update.update(chan, DataProvider.getGithubBranch());
             }
         }
     }
