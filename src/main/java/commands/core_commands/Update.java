@@ -82,7 +82,7 @@ public class Update implements GuildCommand, PMCommand {
 
             // Compile code and make sure it works
             chan.sendMessage("Download finished, compiling...").queue();
-            p = rt.exec(new String[] {DataProvider.getMVNCmd(),"package"}, new String[]{"JAVA_HOME=" + DataProvider.getJavaHome()}, WORKDIR);
+            p = rt.exec(new String[] {DataProvider.getMVNCmd(),"package"},envp, WORKDIR);
             fw.write("------Build log " + new Date() + "------\n");
             new BufferedReader(new InputStreamReader(p.getInputStream())).lines().forEach( l -> {
                 try { fw.append(l).append("\n"); } catch (IOException ignored) {}
