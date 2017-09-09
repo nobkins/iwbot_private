@@ -16,11 +16,14 @@ import net.dv8tion.jda.core.events.user.UserOnlineStatusUpdateEvent;
 import provider.Connections;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class Users {
 	private static Connections connections;
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 	
 	public Users() {
 		Users.connections = new Connections();
@@ -28,8 +31,8 @@ public class Users {
 	
 	public static void sync(ReadyEvent event) {
 		Guild guild = event.getJDA().getGuildById("142749481530556416");
-		System.out.println("[MYSQL] Sync started.");
-		System.out.println("[MYSQL] # Users found: " + guild.getMembers().size());
+		System.out.println("[" + sdf.format(new Date()) + "][MYSQL] Sync started.");
+		System.out.println("[" + sdf.format(new Date()) + "][MYSQL] # Users found: " + guild.getMembers().size());
 		int delUsers = 0, iwUsers = 0, leftUsers = 0, newUsers = 0;
 		
 		List<Member> memberListDS = new ArrayList<>(guild.getMembers());
@@ -90,7 +93,7 @@ public class Users {
 			LogUtil.logErr(e);
 		}
 		
-		System.out.println("[MYSQL] Sync finished.\n"
+		System.out.println("[" + sdf.format(new Date()) + "][MYSQL] Sync finished.\n"
 						 + "[Removed]  " + leftUsers + "\n"
 						 + "[Added]    " + newUsers  + "\n"
 						 + "[Stayed]   " + iwUsers   + "\n"
@@ -100,7 +103,7 @@ public class Users {
 	public static void joined(GuildMemberJoinEvent event) {
 		Member member = event.getMember();
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
-		System.out.printf("[%s] %s has joined the guild.\n", member.getEffectiveName(), event.getMember().getNickname());
+		System.out.printf("[" + sdf.format(new Date()) + "][%s] %s has joined the guild.\n", member.getEffectiveName(), event.getMember().getNickname());
 
 
 		
@@ -119,7 +122,7 @@ public class Users {
 	}
 	
 	public static void left(GuildMemberLeaveEvent event) {
-		System.out.printf("[%s] %s has left the guild.\n", event.getMember().getEffectiveName(), event.getMember().getNickname());
+		System.out.printf("[" + sdf.format(new Date()) + "][%s] %s has left the guild.\n", event.getMember().getEffectiveName(), event.getMember().getNickname());
 		
 		try {
 			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE user SET onlinestatus = ?, role = ?, password = default, sessionkey = default, salt = default WHERE iduser = ?");
@@ -133,19 +136,19 @@ public class Users {
 	}
 	
 	public static void roleUpdate(GuildMemberRoleAddEvent event) {
-		System.out.printf("[Role Added] %s: %s\n", event.getMember().getEffectiveName(), event.getRoles().get(0).getName());
+		System.out.printf("[" + sdf.format(new Date()) + "][Role Added] %s: %s\n", event.getMember().getEffectiveName(), event.getRoles().get(0).getName());
 		roleUpdate(event.getMember());
 	}
 	
 	public static void roleUpdate(GuildMemberRoleRemoveEvent event) {
-		System.out.printf("[Role Removed] %s: %s\n", event.getMember().getEffectiveName(), event.getRoles().get(0).getName());
+		System.out.printf("[" + sdf.format(new Date()) + "][Role Removed] %s: %s\n", event.getMember().getEffectiveName(), event.getRoles().get(0).getName());
 		roleUpdate(event.getMember());
 		
 	}
 	
 	private static void roleUpdate(Member member) {
 		String rName = member.getRoles().isEmpty() ? "none" : member.getRoles().get(0).getName();
-		System.out.printf("[Role Display] %s: %s\n", member.getEffectiveName(), rName);
+		System.out.printf("[" + sdf.format(new Date()) + "][Role Display] %s: %s\n", member.getEffectiveName(), rName);
 		
 		try {
 			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE user SET role = ? WHERE iduser = ?");
@@ -188,7 +191,7 @@ public class Users {
 	}
 	
 	public static void nameUpdate(UserNameUpdateEvent event) {
-		System.out.printf("[Name Update] %s changed to %s\n", event.getOldName(), event.getUser().getName());
+		System.out.printf("[" + sdf.format(new Date()) + "][Name Update] %s changed to %s\n", event.getOldName(), event.getUser().getName());
 		
 		try {
 			PreparedStatement ps = connections.getConnection().prepareStatement("UPDATE user SET username = ? WHERE iduser = ?");
