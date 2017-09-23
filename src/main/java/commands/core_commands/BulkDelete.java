@@ -1,7 +1,7 @@
 package commands.core_commands;
 
 import commands.GuildCommand;
-import net.dv8tion.jda.core.MessageHistory;
+import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PermissionOverride;
 import net.dv8tion.jda.core.entities.TextChannel;

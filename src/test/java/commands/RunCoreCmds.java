@@ -1,4 +1,4 @@
-package commands;
+/*package commands;
 
 import commands.core_commands.*;
 import org.junit.runner.RunWith;
@@ -17,3 +17,4 @@ import org.junit.runners.Suite;
 
 public class RunCoreCmds {
 }
+*/

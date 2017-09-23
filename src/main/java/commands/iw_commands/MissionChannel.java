@@ -1,4 +1,4 @@
-package commands.iw_commands;
+/*package commands.iw_commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.impl.TextChannelImpl;
+
 
 class MissionChannel extends TextChannelImpl {
 	private Message message;
@@ -70,4 +71,4 @@ class MissionChannel extends TextChannelImpl {
 	boolean isPrimed(String id) {
 		return delRequestID != null && delRequestID.equals(id);
 	}
-}
+}*/

@@ -1,4 +1,4 @@
-package commands.iw_commands;
+/*package commands.iw_commands;
 
 import commands.GuildCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -8,7 +8,7 @@ public class MissionsNext implements GuildCommand {
     public void runCommand(GuildMessageReceivedEvent event, String[] args) {
         if (args.length < 1) {
             Missions.nextListEntry(event.getChannel().getId());
-            event.getMessage().deleteMessage();
+            event.getMessage().delete();
         }
     }
 
@@ -17,3 +17,4 @@ public class MissionsNext implements GuildCommand {
         return "Moves the pointer for the Nav list one forward";
     }
 }
+*/

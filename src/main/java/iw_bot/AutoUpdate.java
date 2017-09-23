@@ -1,4 +1,4 @@
-package iw_bot;
+/*package iw_bot;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -89,3 +89,4 @@ class AutoUpdate {
         }
     }
 }
+*/

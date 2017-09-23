@@ -29,9 +29,9 @@ public class Main {
 			
 			new JDABuilder(AccountType.BOT)
 			.setToken(DataProvider.getToken())
-			.addListener(new Listener())
+			.addEventListener(new Listener())
 			.buildBlocking();
-			
+
 		} catch (LoginException e) {
 			System.out.println("[Error] invalid bot token.");
 		} catch (IllegalArgumentException e) {

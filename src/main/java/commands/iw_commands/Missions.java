@@ -1,8 +1,8 @@
-package commands.iw_commands;
+/*package commands.iw_commands;
 
 import commands.GuildCommand;
 import iw_bot.LogUtil;
-import net.dv8tion.jda.core.MessageHistory;
+import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -253,3 +253,4 @@ public class Missions implements GuildCommand {
 		return "format: <new/close>, <mission channel name>, <@explorer name> [creates a mission channel].";
 	}
 }
+*/
