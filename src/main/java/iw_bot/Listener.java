@@ -39,7 +39,7 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onReady(ReadyEvent event) {
 		this.commands = new Commands();
-		new AutoUpdate();
+		//new AutoUpdate();
 
 		//Initial parsing of the memes.json file
 		DankMemes.update();

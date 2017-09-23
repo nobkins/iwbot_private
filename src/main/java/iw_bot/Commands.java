@@ -108,11 +108,11 @@ class Commands {
 
 		guildCommands.put("note", new Notes());
 		
-		guildCommands.put("list", new MissionsList());
+		//guildCommands.put("list", new MissionsList());
 		
-		guildCommands.put("next", new MissionsNext());
+		//guildCommands.put("next", new MissionsNext());
 		
-		guildCommands.put("mission", new Missions());
+		//guildCommands.put("mission", new Missions());
 		
 		guildCommands.put("bgs", new BGS());
 

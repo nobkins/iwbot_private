@@ -1,4 +1,4 @@
-package commands.core_commands;
+/*package commands.core_commands;
 
 import test_helper.FakeTextChannel;
 import net.dv8tion.jda.core.entities.Guild;
@@ -53,4 +53,4 @@ public class TopicTest {
         }
     }
 
-}
+}*/

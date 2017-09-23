@@ -1,4 +1,4 @@
-package commands.core_commands;
+/*package commands.core_commands;
 
 import iw_bot.Listener;
 import org.junit.After;
@@ -44,4 +44,4 @@ public class DebugModeTest {
         Listener.isDebug = previousDebugValue;
     }
 
-}
+}*/

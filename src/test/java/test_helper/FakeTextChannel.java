@@ -1,4 +1,4 @@
-package test_helper;
+/*package test_helper;
 
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -41,4 +41,4 @@ public class FakeTextChannel extends TextChannelImpl {
     public String getTopic() {
         return this.topic;
     }
-}
+}*/
