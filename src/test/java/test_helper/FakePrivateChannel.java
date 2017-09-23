@@ -1,4 +1,4 @@
-package test_helper;
+/*package test_helper;
 
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
@@ -29,3 +29,4 @@ public class FakePrivateChannel extends PrivateChannelImpl {
         return new RestAction.EmptyRestAction<>(msg);
     }
 }
+*/

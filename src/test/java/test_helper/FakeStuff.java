@@ -1,4 +1,4 @@
-package test_helper;
+/*package test_helper;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.entities.Guild;
@@ -89,3 +89,4 @@ public class FakeStuff {
         return new String[] {};
     }
 }
+*/

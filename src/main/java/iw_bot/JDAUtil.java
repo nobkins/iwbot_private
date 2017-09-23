@@ -9,10 +9,7 @@ import java.util.List;
 
 public class JDAUtil {
     public static PrivateChannel getPrivateChannel(User user) {
-        if (!user.hasPrivateChannel())
-            user.openPrivateChannel().complete();
-
-        return user.getPrivateChannel();
+        return user.openPrivateChannel().complete();
     }
 
     public static String[] getRoleIdStrings(Member member) {
