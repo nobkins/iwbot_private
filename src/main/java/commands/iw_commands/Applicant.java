@@ -1,6 +1,7 @@
 package commands.iw_commands;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+import com.sun.xml.internal.bind.v2.TODO;
 import commands.GuildCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.entities.Member;
@@ -15,6 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This command class is for keeping track of
@@ -58,6 +61,12 @@ public class Applicant implements GuildCommand {
 
         if (Arrays.binarySearch(args, "del") > -1)
             delete(event);
+
+    //    if (Arrays.binarySearch(args, "list") > -1)
+    //        applicantlist(event);
+
+        if (Arrays.binarySearch(args, "help") > -1)
+            help(event);
     }
 
     private void delete(GuildMessageReceivedEvent event) {
@@ -169,6 +178,22 @@ public class Applicant implements GuildCommand {
             event.getChannel().sendMessage("Something went wrong. No new applicant saved.").queue();
             LogUtil.logErr(e);
         }
+    }
+
+//    TODO: fix this shit
+    //private void applicantlist (GuildMessageReceivedEvent event) {
+        //Role appl = event.getGuild().getRoleById("401602514010636299");
+        //String Applicants = event.getGuild().getMembersWithRoles(toString(appl), );
+        //String appliicantList = event.getGuild().getMembersByEffectiveName();
+
+    //}
+
+    private void help (GuildMessageReceivedEvent event) {
+
+        String Help = "Applicant Commands and format:\n";
+        Help += "Commands:\n" + "new: registers new applicant\n" + "del: removes applicant and data\n" + "combat: adds in that combat eval is complete\n" + "mission: adds one mission on to completed mock missions\n" +"status: displays named applicants current progress\n" + "\n";
+        Help += "Format is: ```/applicant (command), (applicant name)```\n" + "you can also add more than one command after the applicant name\n" + "ex: ```/applicant (new), (@applicantname), (mission)\n";
+        event.getChannel().sendMessage(Help).queue();
     }
 
     @Override
