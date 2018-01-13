@@ -28,7 +28,7 @@ public class Shutdown implements GuildCommand, PMCommand {
             return;
         }
 
-        event.getChannel().sendMessage(event.getGuild().getEmoteById("281065961325461504").getAsMention() + " I don't want to go...").complete();
+        event.getChannel().sendMessage(" I don't want to go...").complete();
         event.getJDA().shutdown();
         System.exit(0);
     }
