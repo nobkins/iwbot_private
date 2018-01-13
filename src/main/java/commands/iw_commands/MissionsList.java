@@ -1,4 +1,4 @@
-package commands.iw_commands;
+/*package commands.iw_commands;
 
 import commands.GuildCommand;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -27,4 +27,4 @@ public class MissionsList implements GuildCommand {
     public String getHelp(GuildMessageReceivedEvent event) {
         return "Nav list for missions";
     }
-}
+}*/

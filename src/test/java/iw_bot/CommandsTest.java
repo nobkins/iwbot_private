@@ -1,4 +1,4 @@
-package iw_bot;
+/*package iw_bot;
 
 import commands.GuildCommand;
 import net.dv8tion.jda.core.AccountType;
@@ -32,4 +32,4 @@ public class CommandsTest {
             assertNotNull(entry.getValue().getHelp(event));
         }
     }
-}
+}*/

@@ -1,4 +1,4 @@
-package commands.core_commands;
+/*package commands.core_commands;
 
 import org.junit.After;
 import org.junit.Before;
@@ -53,4 +53,4 @@ public class EditOwnerTest {
         }
     }
 
-}
+}*/
