@@ -113,13 +113,13 @@ public class Missions implements GuildCommand {
 							+ "Status: *edit*\n"
 							+ "\n"
 							+ "__**Systems:**__\n"
-							+ "RV: " + "edit" + "\n"
-							+ "Dest: " + "edit" + "\n"
+							+ "RV: " + "*edit*" + "\n"
+							+ "Dest: " + "*edit*" + "\n"
 							+ "Dest Station: *edit*\n"
 							+ "\n"
         					+ "__**Time:**__\n"
-							+ "T-0: " + "edit" + "\n"
-							+ "Date: " + "edit" + "\n";
+							+ "T-0: " + "*edit*" + "\n"
+							+ "Date: " + "*edit*" + "\n";
 		
 		missionChannel.getManager().setTopic(topic).queue();
 
@@ -243,9 +243,19 @@ public class Missions implements GuildCommand {
       	}
 
       	//Ping pilots with information about the mission. Initiate voting.
-		if (args.length > 1 & args[0].equalsIgnoreCase("ping")) {
-        	event.getChannel().sendMessage("This channel is meant for" + missionChannels);
+		if (Arrays.binarySearch(args, "ping") > -1) {
+        	event.getChannel().sendMessage("Mission " + "<@353677862949093376>" + ": ");
 		}
+
+		//Checks topic, looks for changes in certain topic elements
+		String MissionTopic = event.getChannel().getTopic();
+				String RV = MissionTopic.substring(MissionTopic.indexOf("RV: ") + 1, MissionTopic.indexOf("Dest:"));
+				String Dest = MissionTopic.substring(MissionTopic.indexOf("Dest: ") + 1, MissionTopic.indexOf("Dest Station:"));
+				String Time = MissionTopic.substring(MissionTopic.indexOf("Date: ") + 1, MissionTopic.indexOf("\n"));
+				String Tminus = MissionTopic.substring(MissionTopic.indexOf("T-0: ") + 1, MissionTopic.indexOf("Date:"));
+
+		//Check what version of game mission is on
+		//TODO no current method of determining mission version
 	}
 
 	@Override
