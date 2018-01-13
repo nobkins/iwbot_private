@@ -16,6 +16,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.text.ParseException;
 import java.util.*;
 
@@ -70,9 +73,6 @@ public class Applicant implements GuildCommand {
 
         if (Arrays.binarySearch(args, "del") > -1)
             delete(event);
-
-
-
     }
 
     private void delete(GuildMessageReceivedEvent event) {
