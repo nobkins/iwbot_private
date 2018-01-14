@@ -1,7 +1,6 @@
 package commands.iw_commands;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
-import com.sun.xml.internal.bind.v2.TODO;
 import commands.GuildCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.MessageBuilder;
