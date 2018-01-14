@@ -4,7 +4,9 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import com.sun.xml.internal.bind.v2.TODO;
 import commands.GuildCommand;
 import iw_bot.LogUtil;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -15,9 +17,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.text.ParseException;
+import java.util.*;
+
+import static iw_bot.Constants.SQL_SDF;
+import static iw_bot.Constants.USER_SDF;
 
 /**
  * This command class is for keeping track of
@@ -41,7 +45,13 @@ public class Applicant implements GuildCommand {
             return;
         }
 
-        if (event.getMessage().getMentionedUsers().isEmpty()) {
+        if (Arrays.binarySearch(args, "help") > -1)
+            help(event);
+
+        else if (Arrays.binarySearch(args, "list") > -1)
+            applicantlist(event);
+
+        else if (event.getMessage().getMentionedUsers().isEmpty()) {
             event.getChannel().sendMessage("[Error] Please mention a user").queue();
             return;
         }
@@ -62,11 +72,8 @@ public class Applicant implements GuildCommand {
         if (Arrays.binarySearch(args, "del") > -1)
             delete(event);
 
-    //    if (Arrays.binarySearch(args, "list") > -1)
-    //        applicantlist(event);
 
-        if (Arrays.binarySearch(args, "help") > -1)
-            help(event);
+
     }
 
     private void delete(GuildMessageReceivedEvent event) {
@@ -181,18 +188,77 @@ public class Applicant implements GuildCommand {
     }
 
 //    TODO: fix this shit
-    //private void applicantlist (GuildMessageReceivedEvent event) {
-        //Role appl = event.getGuild().getRoleById("401602514010636299");
-        //String Applicants = event.getGuild().getMembersWithRoles(toString(appl), );
-        //String appliicantList = event.getGuild().getMembersByEffectiveName();
+    private void applicantlist (GuildMessageReceivedEvent event) {
+        List Applicants = event.getGuild().getMembersWithRoles(event.getGuild().getRolesByName("Applicant",true));
+        List PC_applicant = event.getGuild().getMembersWithRoles(event.getGuild().getRolesByName("PC_applicant",true));
+        List XBOX_applicant = event.getGuild().getMembersWithRoles(event.getGuild().getRolesByName("XBOX_applicant",true));
+        List PS4_applicant = event.getGuild().getMembersWithRoles(event.getGuild().getRolesByName("PS4_applicant",true));
 
-    //}
+        Iterator iterator = Applicants.iterator();
+
+        ArrayList<String> applicantStats = new ArrayList();
+        while(iterator.hasNext()){
+            Member element = (Member) iterator.next();
+            String applicantStat= new String();
+            applicantStat += element.getEffectiveName();
+            if(PC_applicant.contains(element)) {
+                applicantStat+=" **(PC)**";
+            }
+            if(XBOX_applicant.contains(element)) {
+                applicantStat+=" **(XBOX)**";
+            }
+            if(PS4_applicant.contains(element)) {
+                applicantStat+=" **(PS4)**";
+            }
+
+            try {
+                PreparedStatement ps = con.getConnection().prepareStatement("SELECT * FROM applicants WHERE id = ?");
+                ps.setString(1, element.getUser().getId());
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    applicantStat+=" **E:**" +rs.getInt("eval") + " **M:**" + rs.getInt("missions") + " **A:** "+ USER_SDF.format(SQL_SDF.parse(rs.getString("timestamp")))+ " UTC";
+
+                } else {
+                    applicantStat+=" Not in DB!";
+                }
+            } catch (SQLException e) {
+                event.getChannel().sendMessage("Something went wrong. Couldn't get applcant!").queue();
+                LogUtil.logErr(e);
+            } catch (ParseException e) {
+                event.getChannel().sendMessage("**SQL Date Failed!**").queue();
+                LogUtil.logErr(e);
+            }
+            applicantStats.add(applicantStat);
+        }
+        Collections.sort(applicantStats, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.toLowerCase().compareTo(o2.toLowerCase());
+            }
+        });
+        MessageBuilder toSend = new MessageBuilder().append("**Key**\nE = Evaluations completed (combat)\nM = Missions completed (mock)\nA = Application Date\n\n**Applicants (" + Applicants.size() + ")**\n");
+
+        iterator = applicantStats.iterator();
+        while(iterator.hasNext()){
+            String element = (String) iterator.next();
+            toSend.append(element);
+            toSend.append("\n");
+        }
+
+        for (final Message m : toSend.buildAll(MessageBuilder.SplitPolicy.NEWLINE)) {
+            event.getChannel().sendMessage(m).queue();
+        }
+    }
 
     private void help (GuildMessageReceivedEvent event) {
 
-        String Help = "Applicant Commands and format:\n";
-        Help += "Commands:\n" + "new: registers new applicant\n" + "del: removes applicant and data\n" + "combat: adds in that combat eval is complete\n" + "mission: adds one mission on to completed mock missions\n" +"status: displays named applicants current progress\n" + "\n";
-        Help += "Format is: ```/applicant (command), (applicant name)```\n" + "you can also add more than one command after the applicant name\n" + "ex: ```/applicant (new), (@applicantname), (mission)\n";
+        String Help = "Applicant Commands and format:\n\n";
+        Help += "**Commands**\n" + "*new:* registers new applicant\n"+
+                "*del:* removes applicant and data\n" +
+                "*combat:* adds in that combat eval is complete\n" +
+                "*mission:* adds one mission on to completed mock missions\n" +
+                "*status:* displays named applicants current progress\n" + "\n";
+        Help += "Format is: ```/applicant (command), (@applicant name)```\n" + "you can also add more than one command after the applicant name\n" + "ex: ```/applicant (new), (@applicantname), (mission)```\n";
         event.getChannel().sendMessage(Help).queue();
     }
 
