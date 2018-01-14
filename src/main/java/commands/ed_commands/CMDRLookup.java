@@ -94,33 +94,27 @@ public class CMDRLookup implements PMCommand, GuildCommand {
     private static InaraUser inara(String username) {
         InaraUser user = new InaraUser();
         user.info = "Nothing found";
-
+       // https://inara.cz/search/?location=search&searchglobal=nobkins
         String url = "https://inara.cz/search?location=search&searchglobal=" + username.replaceAll(" ", "+");
         try {
-            Connection.Response loginResponse = Jsoup.connect("https://inara.cz/login")
-                    .header("User-Agent", "Mozilla")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Host", "inara.cz")
-                    .header("Origin", "http://inara.cz")
-                    .header("Upgrade-Insecure-Requests", "1")
-                    .header("Cookie", "elitesheet=21111; esid=cc6746691b3b5359c5d887bdae12a148")
+
+            Connection.Response loginForm = Jsoup
+                    .connect("https://inara.cz/login")
+                    .method(Connection.Method.GET).execute();
+
+            Document login = Jsoup
+                    .connect("https://inara.cz/login")
                     .data("loginid", DataProvider.getInaraUser())
                     .data("loginpass", DataProvider.getInaraPW())
-                    .data("formact", "ENT_LOGIN")
+                    .data("formact", "ENT_MANLOGIN")
                     .data("location", "intro")
-                    .followRedirects(false)
-                    .method(Connection.Method.POST)
-                    .execute();
-
-
-            System.out.println(loginResponse.cookie("esid"));
+                    .data("Login", "Login")
+                    .cookies(loginForm.cookies()).post();
 
             //Use the inara search function to get candidates
-            Document doc = Jsoup.connect(url)
-                    .header("User-Agent", "Mozilla")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Cookie", "esid=cc6746691b3b5359c5d887bdae12a148; elitesheet=21111")
-                    .ignoreContentType(true).get();
+           Document doc = Jsoup.connect(url)
+                    .cookies(loginForm.cookies()).post();
+                    //.ignoreContentType(true).get();
 
             //Find closest match from search results
             double closestScore = 0.0;
@@ -128,6 +122,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
             for (Element link : doc.getElementsByTag("a")) {
                 if (link.attr("href").contains("cmdr/") && !link.text().equals("CMDR's log")) {
+
                     double score = StringUtils.getJaroWinklerDistance(username, link.text());
                     if (score > closestScore && score > 0.8) {
                         closest = link;
