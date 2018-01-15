@@ -253,10 +253,11 @@ public class Applicant implements GuildCommand {
 
         String Help = "Applicant Commands and format:\n\n";
         Help += "**Commands**\n" + "*new:* registers new applicant\n"+
-                "*del:* removes applicant and data\n" +
-                "*combat:* adds in that combat eval is complete\n" +
-                "*mission:* adds one mission on to completed mock missions\n" +
-                "*status:* displays named applicants current progress\n" + "\n";
+                "***del:*** removes applicant and data\n" +
+                "***combat:*** adds in that combat eval is complete\n" +
+                "***mission:*** adds one mission on to completed mock missions\n" +
+                "***status:*** displays named applicants current progress\n" +
+                "***list:*** displays a list of all applicants who have the \"Applicant\" role and their progress.\n\n";
         Help += "Format is: ```/applicant (command), (@applicant name)```\n" + "you can also add more than one command after the applicant name\n" + "ex: ```/applicant (new), (@applicantname), (mission)```\n";
         event.getChannel().sendMessage(Help).queue();
     }
