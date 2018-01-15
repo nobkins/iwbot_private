@@ -81,9 +81,34 @@ public class Applicant implements GuildCommand {
         try {
             PreparedStatement ps = con.getConnection().prepareStatement("DELETE FROM applicants WHERE id = ?");
             ps.setString(1, uApplicant.getId());
+            String out = new String();
 
             if (ps.executeUpdate() == 1) {
-                event.getChannel().sendMessage("Applicant removed").queue();
+
+                Role pc = event.getGuild().getRolesByName("PC_applicant",true).get(0);
+                Role xbox = event.getGuild().getRolesByName("XBOX_applicant",true).get(0);
+                Role ps4 = event.getGuild().getRolesByName("PS4_applicant",true).get(0);
+                Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
+                ArrayList<Role> remRoles = new ArrayList();
+                if (event.getMember().getRoles().contains(pc)) {
+                    remRoles.add(pc);
+                    out += "PC_applicant role removed\n";
+                }
+                if (event.getMember().getRoles().contains(xbox)) {
+                    remRoles.add(xbox);
+                    out += "XBOX_applicant role removed\n";
+                }
+                if (event.getMember().getRoles().contains(ps4)) {
+                    remRoles.add(ps4);
+                    out += "PS4_applicant role removed\n";
+                }
+                if (event.getMember().getRoles().contains(appl)) {
+                    remRoles.add(appl);
+                    out += "Applicant role removed\n";
+                }
+                event.getGuild().getController().removeRolesFromMember(event.getMember(), remRoles).queue();
+                out += "Applicant removed from database\n";
+                event.getChannel().sendMessage(out).queue();
             } else {
                 event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
             }
@@ -162,21 +187,32 @@ public class Applicant implements GuildCommand {
             ps.setString(1, applicant.getId());
             ps.executeUpdate();
 
-            Role pc = event.getGuild().getRoleById("268146248404566026");
-            Role xbox = event.getGuild().getRoleById("268146417883807746");
-            Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
+            Role pc = event.getGuild().getRolesByName("PC_applicant",true).get(0);
+            Role xbox = event.getGuild().getRolesByName("XBOX_applicant",true).get(0);
+            Role ps4 = event.getGuild().getRolesByName("PS4_applicant",true).get(0);
+            Role appl = event.getGuild().getRolesByName("Applicant",true).get(0);
             Member applicantMem = event.getGuild().getMember(applicant);
-
+            ArrayList<Role> addRoles = new ArrayList();
+            addRoles.add(appl);
             Arrays.sort(args);
-            if (Arrays.binarySearch(args, "pc") > -1) {
-                event.getGuild().getController().addRolesToMember(applicantMem, pc).queue();
+            String out = new String();
+            out +="Added Applicant role\n";
+            if (containsCaseInsensitive("pc",Arrays.asList(args))) {
+                addRoles.add(pc);
+                out +="Added PC_Applicant role\n";
             }
-            if (Arrays.binarySearch(args, "xbox") > -1) {
-                event.getGuild().getController().addRolesToMember(applicantMem, xbox).queue();
+            if (containsCaseInsensitive("xbox",Arrays.asList(args))) {
+                addRoles.add(xbox);
+                out +="Added XBOX_Applicant role\n";
             }
-            event.getGuild().getController().addRolesToMember(applicantMem, appl).queue();
+            if (containsCaseInsensitive("ps4",Arrays.asList(args))) {
+                addRoles.add(ps4);
+                out +="Added PS4_Applicant role\n";
+            }
 
-            event.getChannel().sendMessage("Added new applicant").queue();
+            event.getGuild().getController().addRolesToMember(applicantMem, addRoles).queue();
+            out +="Added new applicant\n";
+            event.getChannel().sendMessage(out).queue();
 
         } catch (MySQLIntegrityConstraintViolationException e) {
             event.getChannel().sendMessage("This applicant is already registered").queue();
@@ -199,26 +235,42 @@ public class Applicant implements GuildCommand {
         while(iterator.hasNext()){
             Member element = (Member) iterator.next();
             String applicantStat= new String();
-            applicantStat += element.getEffectiveName();
+            Boolean found = false;
+            applicantStat += "["+element.getEffectiveName()+"]\n"
+                +"Type =";
             if(PC_applicant.contains(element)) {
-                applicantStat+=" **(PC)**";
+                applicantStat+=" PC";
+                found = true;
             }
             if(XBOX_applicant.contains(element)) {
-                applicantStat+=" **(XBOX)**";
+                if(found) {
+                    applicantStat+=",";
+                }
+                applicantStat+=" XBOX";
+                found = true;
             }
             if(PS4_applicant.contains(element)) {
-                applicantStat+=" **(PS4)**";
+                if(found) {
+                    applicantStat+=",";
+                }
+                applicantStat+=" PS4";
+                found = true;
             }
-
+            if(!found) {
+                applicantStat+= "None! You need to allocate a PC, XBox or PS4 role";
+            }
+            applicantStat+="\n";
             try {
                 PreparedStatement ps = con.getConnection().prepareStatement("SELECT * FROM applicants WHERE id = ?");
                 ps.setString(1, element.getUser().getId());
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
-                    applicantStat+=" **E:**" +rs.getInt("eval") + " **M:**" + rs.getInt("missions") + " **A:** "+ USER_SDF.format(SQL_SDF.parse(rs.getString("timestamp")))+ " UTC";
+                    applicantStat+= "Application_Date = " + USER_SDF.format(SQL_SDF.parse(rs.getString("timestamp")))+ " UTC\n"+
+                            "Combat_Evals = " +rs.getInt("eval") + "\n"+
+                            "Mock_Escorts = " + rs.getInt("missions") + "\n";
 
                 } else {
-                    applicantStat+=" Not in DB!";
+                    applicantStat+="Warning = Not in DB! You need to use /applicant new {discordname}\n";
                 }
             } catch (SQLException e) {
                 event.getChannel().sendMessage("Something went wrong. Couldn't get applcant!").queue();
@@ -235,35 +287,48 @@ public class Applicant implements GuildCommand {
                 return o1.toLowerCase().compareTo(o2.toLowerCase());
             }
         });
-        MessageBuilder toSend = new MessageBuilder().append("**Key**\nE = Evaluations completed (combat)\nM = Missions completed (mock)\nA = Application Date\n\n**Applicants (" + Applicants.size() + ")**\n");
 
         iterator = applicantStats.iterator();
+        String out = new String();
+        event.getChannel().sendMessage("**Applicants (" + Applicants.size() + ")**\n").queue();
         while(iterator.hasNext()){
-            String element = (String) iterator.next();
-            toSend.append(element);
-            toSend.append("\n");
+            if( out.length()>1800) {
+                event.getChannel().sendMessage("```ini\n"+out+"```").queue();
+                out = "";
+            }
+            out += iterator.next() + "\n";
         }
+        event.getChannel().sendMessage("```ini\n"+out+"```").queue();
 
-        for (final Message m : toSend.buildAll(MessageBuilder.SplitPolicy.NEWLINE)) {
-            event.getChannel().sendMessage(m).queue();
-        }
     }
 
     private void help (GuildMessageReceivedEvent event) {
 
         String Help = "Applicant Commands and format:\n\n";
-        Help += "**Commands**\n" + "*new:* registers new applicant\n"+
-                "***del:*** removes applicant and data\n" +
+        Help += "**Commands**\n" +
+                "***new:*** registers new applicant and adds roles\n"+
+                "eg. /applicant new,@CMDR,xbox,ps4\n"+
+                "***del:*** removes applicant and data and roles\n" +
+                "eg. /applicant del,@CMDR\n"+
                 "***combat:*** adds in that combat eval is complete\n" +
                 "***mission:*** adds one mission on to completed mock missions\n" +
                 "***status:*** displays named applicants current progress\n" +
                 "***list:*** displays a list of all applicants who have the \"Applicant\" role and their progress.\n\n";
-        Help += "Format is: ```/applicant (command), (@applicant name)```\n" + "you can also add more than one command after the applicant name\n" + "ex: ```/applicant (new), (@applicantname), (mission)```\n";
+        Help += "Format is: `/applicant (command), (@applicant name)`\n" + "you can also add more than one command after the applicant name\n" + "ex: `/applicant (new), (@applicantname), (mission)`\n";
         event.getChannel().sendMessage(Help).queue();
     }
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
         return "";
+    }
+
+    public boolean containsCaseInsensitive(String s, List<String> l){
+        for (String string : l){
+            if (string.equalsIgnoreCase(s)){
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -83,7 +83,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .setImage(user.avatarUrl);
         } else {
             eb.setTitle(args[0])
-                    .addField("Inara", "Nothing found", false);
+                    .addField("Inara", "Timeout or nothing found. Please try again.", false);
         }
         eb.addField("r/EliteCombatLoggers", logger, false);
 
@@ -100,10 +100,12 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
             Connection.Response loginForm = Jsoup
                     .connect("https://inara.cz/login")
+                    .timeout(10 * 1000)
                     .method(Connection.Method.GET).execute();
 
             Document login = Jsoup
                     .connect("https://inara.cz/login")
+                    .timeout(10 * 1000)
                     .data("loginid", DataProvider.getInaraUser())
                     .data("loginpass", DataProvider.getInaraPW())
                     .data("formact", "ENT_MANLOGIN")
@@ -113,6 +115,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
 
             //Use the inara search function to get candidates
            Document doc = Jsoup.connect(url)
+                    .timeout(10 * 1000)
                     .cookies(loginForm.cookies()).post();
                     //.ignoreContentType(true).get();
 
@@ -155,9 +158,11 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                 return user;
             }
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             LogUtil.logErr(e);
+
         }
 
         return null;
