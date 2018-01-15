@@ -4,10 +4,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import commands.GuildCommand;
 import iw_bot.LogUtil;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import provider.Connections;
 import provider.DataProvider;
@@ -18,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static iw_bot.Constants.SQL_SDF;
 import static iw_bot.Constants.USER_SDF;
@@ -43,21 +41,41 @@ public class Applicant implements GuildCommand {
             event.getChannel().sendMessage("[Error] Please use at least one argument for this command").queue();
             return;
         }
+        Arrays.sort(args);
 
-        if (Arrays.binarySearch(args, "help") > -1)
+        if (Arrays.binarySearch(args, "help") > -1) {
             help(event);
-
-        else if (Arrays.binarySearch(args, "list") > -1)
+            return;
+        } else if (Arrays.binarySearch(args, "list") > -1) {
             applicantlist(event);
-
-        else if (event.getMessage().getMentionedUsers().isEmpty()) {
+            return;
+        } else if (event.getMessage().getMentionedUsers().isEmpty()) {
             event.getChannel().sendMessage("[Error] Please mention a user").queue();
             return;
         }
 
-        Arrays.sort(args);
-        if (Arrays.binarySearch(args, "new") > -1)
-            newApplicant(event, args);
+        if (Arrays.binarySearch(args, "status") > -1) {
+            status(event);
+            return;
+        }
+
+        if (Arrays.binarySearch(args, "failed") > -1 || Arrays.binarySearch(args, "fail") > -1) {
+            delete(event, false);
+            return;
+        }
+
+        if (Arrays.binarySearch(args, "passed") > -1 || Arrays.binarySearch(args, "pass") > -1) {
+            delete(event, true);
+            return;
+        }
+
+        if (Arrays.binarySearch(args, "new") > -1) {
+            if(args.length < 3) {
+                event.getChannel().sendMessage("You need to specify the type of applicant (PC,XBOX,PS4)\neg.\n/applicant new,@CMDR,PS4").queue();
+            } else {
+                newApplicant(event, args);
+            }
+        }
 
         if (Arrays.binarySearch(args, "combat") > -1)
             combat(event);
@@ -65,17 +83,9 @@ public class Applicant implements GuildCommand {
         if (Arrays.binarySearch(args, "mission") > -1)
             mission(event);
 
-        if (Arrays.binarySearch(args, "status") > -1)
-            status(event);
-
-        if (Arrays.binarySearch(args, "del") > -1)
-            delete(event);
-
-
-
     }
 
-    private void delete(GuildMessageReceivedEvent event) {
+    private void delete(GuildMessageReceivedEvent event,boolean pass) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
 
         try {
@@ -84,31 +94,93 @@ public class Applicant implements GuildCommand {
             String out = new String();
 
             if (ps.executeUpdate() == 1) {
-
-                Role pc = event.getGuild().getRolesByName("PC_applicant",true).get(0);
-                Role xbox = event.getGuild().getRolesByName("XBOX_applicant",true).get(0);
-                Role ps4 = event.getGuild().getRolesByName("PS4_applicant",true).get(0);
+                List<Role> memberRoles = event.getMember().getRoles();
+                List newMemberRoles = new ArrayList<Role>(memberRoles);
+                Role pc = event.getGuild().getRolesByName("PC_applicant", true).get(0);
+                Role pcPilot = event.getGuild().getRolesByName("PC Pilots", true).get(0);
+                Role xbox = event.getGuild().getRolesByName("XBOX_applicant", true).get(0);
+                Role xboxPilot = event.getGuild().getRolesByName("XBOX Pilots", true).get(0);
+                Role ps4 = event.getGuild().getRolesByName("PS4_applicant", true).get(0);
+                Role ps4Pilot = event.getGuild().getRolesByName("PS4 Pilots", true).get(0);
                 Role appl = event.getGuild().getRolesByName("Applicant", true).get(0);
-                ArrayList<Role> remRoles = new ArrayList();
-                if (event.getMember().getRoles().contains(pc)) {
-                    remRoles.add(pc);
-                    out += "PC_applicant role removed\n";
+                Role needsCE = event.getGuild().getRolesByName("Needs CE", true).get(0);
+                Role IridiumWing = event.getGuild().getRolesByName("Iridium Wing", true).get(0);
+                Role escortPilots = event.getGuild().getRolesByName("Escort Pilots", true).get(0);
+
+                if (pass) {
+                    if (!memberRoles.contains(escortPilots)) {
+                        newMemberRoles.add(escortPilots);
+                        out += "Upgrded to \"Escort Pilot\"\n";
+                    }
+                } else if (memberRoles.contains(IridiumWing)) {
+                    newMemberRoles.remove(IridiumWing);
+                    out += "\"Iridium Wing\" role removed\n";
                 }
-                if (event.getMember().getRoles().contains(xbox)) {
-                    remRoles.add(xbox);
-                    out += "XBOX_applicant role removed\n";
+                if (memberRoles.contains(pc)) {
+                    newMemberRoles.remove(pc);
+                    if (pass) {
+                        newMemberRoles.add(pcPilot);
+                        out += "Upgraded to \"PC Pilot\"\n";
+                    } else {
+                        out += "\"PC_applicant\" role removed\n";
+                    }
                 }
-                if (event.getMember().getRoles().contains(ps4)) {
-                    remRoles.add(ps4);
-                    out += "PS4_applicant role removed\n";
+                if (memberRoles.contains(xbox)) {
+                    newMemberRoles.remove(xbox);
+                    if (pass) {
+                        newMemberRoles.add(xboxPilot);
+                        out += "Upgraded to \"XBOX Pilot\"\n";
+                    } else {
+                        out += "\"XBOX_applicant\" role removed\n";
+                    }
                 }
-                if (event.getMember().getRoles().contains(appl)) {
-                    remRoles.add(appl);
-                    out += "Applicant role removed\n";
+                if (memberRoles.contains(ps4)) {
+                    newMemberRoles.remove(ps4);
+                    if (pass) {
+                        newMemberRoles.add(ps4Pilot);
+                        out += "Upgraded to \"PS4 Pilot\"\n";
+                    } else {
+                        out += "\"PS4_applicant\" role removed\n";
+                    }
                 }
-                event.getGuild().getController().removeRolesFromMember(event.getMember(), remRoles).queue();
-                out += "Applicant removed from database\n";
+                if (memberRoles.contains(appl)) {
+                    newMemberRoles.remove(appl);
+                    out += "\"Applicant\" role removed\n";
+                }
+                if (memberRoles.contains(needsCE)) {
+                    newMemberRoles.remove(needsCE);
+                    out += "\"Needs CE\" role removed\n";
+                }
+                Iterator iterator = memberRoles.iterator();
+                while(iterator.hasNext()) {
+                    Role element = (Role) iterator.next();
+                    System.out.print("memberRoles: "+element.getName() + "\n");
+                }
+                iterator = newMemberRoles.iterator();
+                while(iterator.hasNext()) {
+                    Role element = (Role) iterator.next();
+
+                    System.out.print("newMemberRoles: "+element.getName() + "\n");
+                }
+                event.getGuild().getController().modifyMemberRoles(event.getMember(), newMemberRoles).queue();
+                if (pass) {
+                    out += "Applicant Succesfully promoted!\n";
+                } else {
+                    out += "Applicant removed from database\n";
+                }
                 event.getChannel().sendMessage(out).queue();
+                TextChannel channel = event.getGuild().getTextChannelsByName("iridium_Lounge",true).get(0);
+                String congrats = new String();
+                congrats += "**Congratulations** to " + uApplicant.getAsMention() + " for being promoted to an **Escort Pilot!**\n\n";
+                if (memberRoles.contains(pc))
+                    congrats += pcPilot.getAsMention() + " ";
+                if (memberRoles.contains(xbox))
+                    congrats += xboxPilot.getAsMention() + " ";
+                if (memberRoles.contains(ps4))
+                    congrats += ps4Pilot.getAsMention() + " ";
+                congrats += " please welcome a new pilot to your ranks.";
+
+                channel.sendMessage(congrats).queue();
             } else {
                 event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
             }
@@ -118,6 +190,7 @@ public class Applicant implements GuildCommand {
             LogUtil.logErr(e);
         }
     }
+
 
     private void status(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
@@ -164,13 +237,14 @@ public class Applicant implements GuildCommand {
 
     private void combat(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
-
+        Role needsCE = event.getGuild().getRolesByName("Needs CE",true).get(0);
         try {
             PreparedStatement ps = con.getConnection().prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
             ps.setString(1, uApplicant.getId());
 
             if (ps.executeUpdate() == 1) {
-                event.getChannel().sendMessage("Added combat eval done").queue();
+                event.getChannel().sendMessage("Combat eval complete \"Needs CE\" role removed.").queue();
+                event.getGuild().getController().removeRolesFromMember(event.getMember(), needsCE).queue();
             } else {
                 event.getChannel().sendMessage("No combat eval added. Either applicant already had his or he wasn't found.").queue();
             }
@@ -191,23 +265,27 @@ public class Applicant implements GuildCommand {
             Role xbox = event.getGuild().getRolesByName("XBOX_applicant",true).get(0);
             Role ps4 = event.getGuild().getRolesByName("PS4_applicant",true).get(0);
             Role appl = event.getGuild().getRolesByName("Applicant",true).get(0);
+            Role IridiumWing = event.getGuild().getRolesByName("Iridium Wing",true).get(0);
+            Role needsCE = event.getGuild().getRolesByName("Needs CE",true).get(0);
             Member applicantMem = event.getGuild().getMember(applicant);
             ArrayList<Role> addRoles = new ArrayList();
             addRoles.add(appl);
+            addRoles.add(IridiumWing);
+            addRoles.add(needsCE);
             Arrays.sort(args);
             String out = new String();
-            out +="Added Applicant role\n";
+            out +="Added \"Applicant\" role\nAdded \"Iridium Wing\" role\nAdded \"Needs CE\" role\n";
             if (containsCaseInsensitive("pc",Arrays.asList(args))) {
                 addRoles.add(pc);
-                out +="Added PC_Applicant role\n";
+                out +="Added \"PC_Applicant\" role\n";
             }
             if (containsCaseInsensitive("xbox",Arrays.asList(args))) {
                 addRoles.add(xbox);
-                out +="Added XBOX_Applicant role\n";
+                out +="Added \"XBOX_Applicant\" role\n";
             }
             if (containsCaseInsensitive("ps4",Arrays.asList(args))) {
                 addRoles.add(ps4);
-                out +="Added PS4_Applicant role\n";
+                out +="Added \"PS4_Applicant\" role\n";
             }
 
             event.getGuild().getController().addRolesToMember(applicantMem, addRoles).queue();
@@ -308,8 +386,10 @@ public class Applicant implements GuildCommand {
         Help += "**Commands**\n" +
                 "***new:*** registers new applicant and adds roles\n"+
                 "eg. /applicant new,@CMDR,xbox,ps4\n"+
-                "***del:*** removes applicant and data and roles\n" +
-                "eg. /applicant del,@CMDR\n"+
+                "***pass:*** Removes applicant and coverts them to a fully fledged escort pilot!\n" +
+                "eg. /applicant pass,@CMDR\n"+
+                "***fail:*** Removes applicant!\n" +
+                "eg. /applicant pass,@CMDR\n"+
                 "***combat:*** adds in that combat eval is complete\n" +
                 "***mission:*** adds one mission on to completed mock missions\n" +
                 "***status:*** displays named applicants current progress\n" +
