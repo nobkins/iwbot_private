@@ -83,7 +83,7 @@ public class CMDRLookup implements PMCommand, GuildCommand {
                     .setImage(user.avatarUrl);
         } else {
             eb.setTitle(args[0])
-                    .addField("Inara", "Timeout or nothing found. Please try again.", false);
+                    .addField("Inara", "CMDR not found on Inara", false);
         }
         eb.addField("r/EliteCombatLoggers", logger, false);
 
@@ -162,7 +162,8 @@ public class CMDRLookup implements PMCommand, GuildCommand {
         catch (Exception e) {
             e.printStackTrace();
             LogUtil.logErr(e);
-
+            user.info = "Timeout! Please try again";
+            return user;
         }
 
         return null;
