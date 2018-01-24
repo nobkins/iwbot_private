@@ -87,6 +87,7 @@ public class Applicant implements GuildCommand {
 
     private void delete(GuildMessageReceivedEvent event,boolean pass) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
+        Member mApplicant = event.getGuild().getMember(uApplicant);
 
         try {
             PreparedStatement ps = con.getConnection().prepareStatement("DELETE FROM applicants WHERE id = ?");
@@ -94,7 +95,7 @@ public class Applicant implements GuildCommand {
             String out = new String();
 
             if (ps.executeUpdate() == 1) {
-                List<Role> memberRoles = event.getMember().getRoles();
+                List<Role> memberRoles = event.getGuild().getMember(uApplicant).getRoles();
                 List newMemberRoles = new ArrayList<Role>(memberRoles);
                 Role pc = event.getGuild().getRolesByName("PC_applicant", true).get(0);
                 Role pcPilot = event.getGuild().getRolesByName("PC Pilots", true).get(0);
@@ -110,7 +111,7 @@ public class Applicant implements GuildCommand {
                 if (pass) {
                     if (!memberRoles.contains(escortPilots)) {
                         newMemberRoles.add(escortPilots);
-                        out += "Upgrded to \"Escort Pilot\"\n";
+                        out += "Upgraded to \"Escort Pilot\"\n";
                     }
                 } else if (memberRoles.contains(IridiumWing)) {
                     newMemberRoles.remove(IridiumWing);
@@ -162,7 +163,7 @@ public class Applicant implements GuildCommand {
 
                     System.out.print("newMemberRoles: "+element.getName() + "\n");
                 }
-                event.getGuild().getController().modifyMemberRoles(event.getMember(), newMemberRoles).queue();
+                event.getGuild().getController().modifyMemberRoles(mApplicant, newMemberRoles).queue();
                 if (pass) {
                     out += "Applicant Succesfully promoted!\n";
                 } else {
@@ -180,7 +181,7 @@ public class Applicant implements GuildCommand {
                     congrats += ps4Pilot.getAsMention() + " ";
                 congrats += " please welcome a new pilot to your ranks.";
 
-                channel.sendMessage(congrats).queue();
+                //channel.sendMessage(congrats).queue();
             } else {
                 event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
             }
