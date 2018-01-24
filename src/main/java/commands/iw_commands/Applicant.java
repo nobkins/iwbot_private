@@ -181,7 +181,7 @@ public class Applicant implements GuildCommand {
                     congrats += ps4Pilot.getAsMention() + " ";
                 congrats += " please welcome a new pilot to your ranks.";
 
-                //channel.sendMessage(congrats).queue();
+                channel.sendMessage(congrats).queue();
             } else {
                 event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
             }
