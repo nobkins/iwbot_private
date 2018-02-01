@@ -170,18 +170,20 @@ public class Applicant implements GuildCommand {
                     out += "Applicant removed from database\n";
                 }
                 event.getChannel().sendMessage(out).queue();
-                TextChannel channel = event.getGuild().getTextChannelsByName("iridium_Lounge",true).get(0);
-                String congrats = new String();
-                congrats += "**Congratulations** to " + uApplicant.getAsMention() + " for being promoted to an **Escort Pilot!**\n\n";
-                if (memberRoles.contains(pc))
-                    congrats += pcPilot.getAsMention() + " ";
-                if (memberRoles.contains(xbox))
-                    congrats += xboxPilot.getAsMention() + " ";
-                if (memberRoles.contains(ps4))
-                    congrats += ps4Pilot.getAsMention() + " ";
-                congrats += " please welcome a new pilot to your ranks.";
+                if (pass) {
+                    TextChannel channel = event.getGuild().getTextChannelsByName("iridium_Lounge", true).get(0);
+                    String congrats = new String();
+                    congrats += "**Congratulations** to " + uApplicant.getAsMention() + " for being promoted to an **Escort Pilot!**\n\n";
+                    if (memberRoles.contains(pc))
+                        congrats += pcPilot.getAsMention() + " ";
+                    if (memberRoles.contains(xbox))
+                        congrats += xboxPilot.getAsMention() + " ";
+                    if (memberRoles.contains(ps4))
+                        congrats += ps4Pilot.getAsMention() + " ";
+                    congrats += " please welcome a new pilot to your ranks.";
 
-                channel.sendMessage(congrats).queue();
+                    channel.sendMessage(congrats).queue();
+                }
             } else {
                 event.getChannel().sendMessage("Applicant not found. Has he been registered via 'applicant new, ...' ?").queue();
             }
@@ -315,8 +317,9 @@ public class Applicant implements GuildCommand {
             Member element = (Member) iterator.next();
             String applicantStat= new String();
             Boolean found = false;
-            applicantStat += "["+element.getEffectiveName()+"]\n"
-                +"Type =";
+            applicantStat += "["+element.getUser().getName() +"]\n"
+                    + "Nickname = " + element.getEffectiveName() + "\n"
+                    +"Type =";
             if(PC_applicant.contains(element)) {
                 applicantStat+=" PC";
                 found = true;
