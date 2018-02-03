@@ -240,6 +240,7 @@ public class Applicant implements GuildCommand {
 
     private void combat(GuildMessageReceivedEvent event) {
         User uApplicant = event.getMessage().getMentionedUsers().get(0);
+        Member mApplicant = event.getGuild().getMember(uApplicant);
         Role needsCE = event.getGuild().getRolesByName("Needs CE",true).get(0);
         try {
             PreparedStatement ps = con.getConnection().prepareStatement("UPDATE applicants SET eval = eval + 1 WHERE id = ? AND eval < 1");
@@ -247,7 +248,7 @@ public class Applicant implements GuildCommand {
 
             if (ps.executeUpdate() == 1) {
                 event.getChannel().sendMessage("Combat eval complete \"Needs CE\" role removed.").queue();
-                event.getGuild().getController().removeRolesFromMember(event.getMember(), needsCE).queue();
+                event.getGuild().getController().removeRolesFromMember(mApplicant, needsCE).queue();
             } else {
                 event.getChannel().sendMessage("No combat eval added. Either applicant already had his or he wasn't found.").queue();
             }
@@ -404,7 +405,7 @@ public class Applicant implements GuildCommand {
 
     @Override
     public String getHelp(GuildMessageReceivedEvent event) {
-        return "";
+        return "Manages applicants. Use /applicant help for more details.";
     }
 
     public boolean containsCaseInsensitive(String s, List<String> l){
