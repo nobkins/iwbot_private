@@ -38,7 +38,7 @@ public class Applicant implements GuildCommand {
         }
 
         if (args.length == 0) {
-            event.getChannel().sendMessage("[Error] Please use at least one argument for this command").queue();
+            event.getChannel().sendMessage("[Error] Please use at least one argument for this command. Arguments available:\n[help|list|status|fail|pass|new|combat|mission]").queue();
             return;
         }
         Arrays.sort(args);
@@ -215,7 +215,7 @@ public class Applicant implements GuildCommand {
             }
 
         } catch (SQLException e) {
-            event.getChannel().sendMessage("Something went wrong. Couldn't get status of applicant").queue();
+            event.getChannel().sendMessage("Something went wrong. Couldn't get status of applicant.\n/applicant status,@mention").queue();
             LogUtil.logErr(e);
         }
     }
