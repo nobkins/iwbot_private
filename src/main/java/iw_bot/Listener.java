@@ -147,7 +147,7 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 	    if (!DataProvider.isDev()) {
-            TextChannel channel = event.getGuild().getPublicChannel();
+            TextChannel channel = event.getGuild().getTextChannelById("493824485200494612");
             channel.sendMessage(DataProvider.getNewMemberInfo().replaceAll("<user>", event.getMember().getAsMention())).queue();
 
             event.getJDA().getTextChannelById(DataProvider.getAdminChanID())
